@@ -1,0 +1,58 @@
+name: update-app
+
+on:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: "App version"
+        type: choice
+        default: 'V1'
+        required: true
+        options:
+          - v1
+          - v2
+          - v3
+          - v4
+          - v5
+
+env:
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+jobs:
+  change-app-version-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+          token: ${{ secrets.ARMOSEC_GITHUB_ACCESS_TOKEN }}
+
+      - name: Print App version
+        run: |
+          echo "App version ${{ inputs.VERSION }} was selected"
+
+      - name: Remove Old ConfigMap
+        run: |
+          rm -f manifests/nginx-app/nginx-config.yaml
+          sed -i '/nginx-config/d' manifests/nginx-app/nginx-deployment.yaml
+
+      - name: Copy Config File
+        run: |
+          VERSION=${{ inputs.VERSION }}
+          if [ -d "manifests/$VERSION" ]; then
+            cp manifests/$VERSION/nginx-config-$VERSION.yaml manifests/nginx-app/nginx-config.yaml
+            sed -i "s/name: nginx-config/name: nginx-config-$VERSION/g" manifests/nginx-app/nginx-deployment.yaml
+          else
+            echo "Invalid version: $VERSION"
+            exit 1
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "<>"
+          git add .
+          git commit -m "Update nginx-config and deployment for version ${{ inputs.VERSION }}"
+          git push
