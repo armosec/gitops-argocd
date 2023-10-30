@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-v1
+  namespace: web-app
+data:
+  default.conf: |
+    server {
+        listen 80;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NGINX App v1.0</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                height: 100vh;
+                align-items: center;
+                justify-content: center;
+                background-color: #e6f7ff;
+            }
+            .container {
+                padding: 20px;
+                border-radius: 10px;
+                background-color: #ffffff;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>NGINX App - Version v1.0</h1>
+        </div>
+    </body>
+    </html>
