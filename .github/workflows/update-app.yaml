@@ -20,7 +20,7 @@ env:
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 jobs:
-  change-app-version-and-commit:
+  update-app:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,15 +35,16 @@ jobs:
 
       - name: Remove Old ConfigMap
         run: |
-          rm -f manifests/nginx-app/nginx-config.yaml
+          rm -f manifests/nginx-app/nginx-config*.yaml
           sed -i '/nginx-config/d' manifests/nginx-app/nginx-deployment.yaml
 
       - name: Copy Config File
         run: |
           VERSION=${{ inputs.VERSION }}
           if [ -d "manifests/$VERSION" ]; then
-            cp manifests/$VERSION/nginx-config-$VERSION.yaml manifests/nginx-app/nginx-config.yaml
+            cp manifests/$VERSION/nginx-config-$VERSION.yaml manifests/nginx-app/nginx-config-$VERSION.yaml
             sed -i "s/name: nginx-config/name: nginx-config-$VERSION/g" manifests/nginx-app/nginx-deployment.yaml
+            sed -i "s/items:/name: nginx-config-$VERSION\n          items:/g" manifests/nginx-app/nginx-deployment.yaml
           else
             echo "Invalid version: $VERSION"
             exit 1
