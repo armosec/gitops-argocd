@@ -26,13 +26,13 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: nginx-config-v4
+          name: nginx-config-v3
           items:
           - key: default.conf
             path: default.conf
       - name: html-volume
         configMap:
-          name: nginx-config-v4
+          name: nginx-config-v3
           items:
           - key: index.html
             path: index.html
